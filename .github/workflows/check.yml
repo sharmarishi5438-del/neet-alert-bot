@@ -1,0 +1,36 @@
+name: AMRU NEET UG Notification Check
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+
+      - name: Run notification check
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+        run: python amru_neet_telegram_bot.py
+
+      - name: Save updated state
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update notice tracking"
+          file_pattern: "seen_notices.json last_checked.txt last_heartbeat.txt"
